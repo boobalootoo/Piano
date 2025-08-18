@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Pianos</title>
+    <style>
+        /* General body styling for centering and background */
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            overflow-x: hidden; /* Prevents horizontal scrolling */
+            gap: 40px;
+            padding: 20px 0;
+        }
+
+        /* Piano container styling */
+        .piano-container {
+            position: relative;
+            width: 90%;
+            max-width: 700px;
+            height: 250px;
+            background: #333;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        /* Base styling for all keys */
+        .key {
+            position: relative;
+            cursor: pointer;
+            box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 5px 5px;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        /* Visual feedback when a key is active (pressed) */
+        .key.active {
+            transform: translateY(3px);
+            box-shadow: inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Styling for white piano keys */
+        .key.white {
+            width: 10%;
+            height: 100%;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 10px;
+            z-index: 1;
+        }
+
+        /* Styling for black piano keys */
+        .key.black {
+            width: 6%;
+            height: 60%;
+            background-color: #000;
+            margin-left: -3%;
+            margin-right: -3%;
+            z-index: 2;
+            border-radius: 0 0 5px 5px;
+        }
+
+        /* --- Icon and Text Styling --- */
+
+        /* Container for the icon and note name */
+        .key-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Styling for emoji icons */
+        .icon-text {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+
+        /* Styling for the specific image icon */
+        .icon-image {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+
+        /* Styling for the note letter and name text */
+        .note-label {
+            font-size: 0.8em;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: #444;
+            margin: 0;
+            text-align: center;
+        }
+
+        /* Responsive layout adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .piano-container {
+                height: 200px;
+                padding: 15px;
+            }
+            .key.white {
+                width: 12%;
+            }
+            .key.black {
+                width: 7%;
+                height: 55%;
+            }
+            .icon-text {
+                font-size: 2em;
+            }
+            .icon-image {
+                width: 40px;
+                height: 40px;
+            }
+            body {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Do-Re-Mi Piano</h2>
+    <div id="piano-solfege" class="piano-container">
+        <!-- C key -->
+        <div class="key white" data-note="C">
+            <div class="key-content">
+                <span class="icon-text">🦌</span>
+                <span class="note-label">Do</span>
+            </div>
+        </div>
+        <div class="key black" data-note="C#"></div>
+        <!-- D key -->
+        <div class="key white" data-note="D">
+            <div class="key-content">
+                <span class="icon-text">☀️</span>
+                <span class="note-label">Re</span>
+            </div>
+        </div>
+        <div class="key black" data-note="D#"></div>
+        <!-- E key -->
+        <div class="key white" data-note="E">
+            <div class="key-content">
+                <span class="icon-text">🪞</span>
+                <span class="note-label">Mi</span>
+            </div>
+        </div>
+        <!-- F key -->
+        <div class="key white" data-note="F">
+            <div class="key-content">
+                <span class="icon-text">🏃‍♂️</span>
+                <span class="note-label">Fa</span>
+            </div>
+        </div>
+        <div class="key black" data-note="F#"></div>
+        <!-- G key -->
+        <div class="key white" data-note="G">
+            <div class="key-content">
+                <span class="icon-text">🧵</span>
+                <span class="note-label">Sol</span>
+            </div>
+        </div>
+        <div class="key black" data-note="G#"></div>
+        <!-- A key with a special image icon -->
+        <div class="key white" data-note="A">
+            <div class="key-content">
+                <img class="icon-image" src="https://raw.githubusercontent.com/boobalootoo/Piano/main/dilb9y9-6274f5d3-5620-4bc2-9f34-17ad379a411d.png" alt="La icon">
+                <span class="note-label">La</span>
+            </div>
+        </div>
+        <div class="key black" data-note="A#"></div>
+        <!-- B key -->
+        <div class="key white" data-note="B">
+            <div class="key-content">
+                <span class="icon-text">🍵</span>
+                <span class="note-label">Ti</span>
+            </div>
+        </div>
+    </div>
+
+    <h2>Letter Piano</h2>
+    <div id="piano-letters" class="piano-container">
+        <!-- C key -->
+        <div class="key white" data-note="C">
+            <div class="key-content">
+                <span class="icon-text">🐣</span>
+                <span class="note-label">C<br>chick</span>
+            </div>
+        </div>
+        <div class="key black" data-note="C#"></div>
+        <!-- D key -->
+        <div class="key white" data-note="D">
+            <div class="key-content">
+                <span class="icon-text">🦆</span>
+                <span class="note-label">D<br>duck</span>
+            </div>
+        </div>
+        <div class="key black" data-note="D#"></div>
+        <!-- E key -->
+        <div class="key white" data-note="E">
+            <div class="key-content">
+                <span class="icon-text">🧝‍♀️</span>
+                <span class="note-label">E<br>elf</span>
+            </div>
+        </div>
+        <!-- F key -->
+        <div class="key white" data-note="F">
+            <div class="key-content">
+                <span class="icon-text">🌀</span>
+                <span class="note-label">F<br>fan</span>
+            </div>
+        </div>
+        <div class="key black" data-note="F#"></div>
+        <!-- G key -->
+        <div class="key white" data-note="G">
+            <div class="key-content">
+                <span class="icon-text">🧪</span>
+                <span class="note-label">G<br>glue</span>
+            </div>
+        </div>
+        <div class="key black" data-note="G#"></div>
+        <!-- A key -->
+        <div class="key white" data-note="A">
+            <div class="key-content">
+                <span class="icon-text">🎯</span>
+                <span class="note-label">A<br>aim</span>
+            </div>
+        </div>
+        <div class="key black" data-note="A#"></div>
+        <!-- B key -->
+        <div class="key white" data-note="B">
+            <div class="key-content">
+                <span class="icon-text">🐞</span>
+                <span class="note-label">B<br>bug</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const keys = document.querySelectorAll('.key');
+            let audioContext;
+            let oscillators = {};
+
+            function getOrCreateAudioContext() {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                return audioContext;
+            }
+
+            function playNote(frequency, keyElement) {
+                if (!audioContext) getOrCreateAudioContext();
+                
+                // Stop any previous note on this key to prevent overlapping sounds
+                if (oscillators[keyElement]) {
+                    stopNote(keyElement);
+                }
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.value = frequency;
+
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.01);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.start();
+                oscillators[keyElement] = { oscillator, gainNode };
+            }
+
+            function stopNote(keyElement) {
+                if (oscillators[keyElement]) {
+                    const { gainNode, oscillator } = oscillators[keyElement];
+                    // Fade out the sound to avoid a harsh stop
+                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                    delete oscillators[keyElement];
+                }
+            }
+
+            // Frequencies for the musical notes
+            const noteFrequencies = {
+                'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13, 'E': 329.63,
+                'F': 349.23, 'F#': 369.99, 'G': 392.00, 'G#': 415.30, 'A': 440.00,
+                'A#': 466.16, 'B': 493.88
+            };
+
+            keys.forEach(key => {
+                const note = key.dataset.note;
+                const frequency = noteFrequencies[note];
+
+                // Mouse events for desktop (click and release)
+                key.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    playNote(frequency, key);
+                    key.classList.add('active');
+                });
+                key.addEventListener('mouseup', () => {
+                    stopNote(key);
+                    key.classList.remove('active');
+                });
+                key.addEventListener('mouseleave', () => {
+                    stopNote(key);
+                    key.classList.remove('active');
+                });
+
+                // Touch events for mobile
+                key.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    playNote(frequency, key);
+                    key.classList.add('active');
+                });
+                key.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    stopNote(key);
+                    key.classList.remove('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
