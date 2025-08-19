@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Pianos</title>
+    <style>
+        /* General body styling for centering and background */
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            overflow-x: hidden; /* Prevents horizontal scrolling */
+            gap: 40px;
+            padding: 20px 0;
+        }
+
+        /* Piano container styling */
+        .piano-container {
+            position: relative;
+            width: 90%;
+            max-width: 700px;
+            height: 250px;
+            background: #333;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        /* Base styling for all keys */
+        .key {
+            position: relative;
+            cursor: pointer;
+            box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 5px 5px;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        /* Visual feedback when a key is active (pressed) */
+        .key.active {
+            transform: translateY(3px);
+            box-shadow: inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+            filter: brightness(1.2); /* Makes the key slightly brighter when active */
+        }
+
+        .key.black.active {
+            background-color: #555; /* Highlight color for active black keys */
+        }
+
+        /* Pastel colors for the white keys */
+        .key.white.C-key { background-color: #FFB6C1; } /* Light Pink */
+        .key.white.D-key { background-color: #FFDAB9; } /* Peach */
+        .key.white.E-key { background-color: #FFFACD; } /* Lemon Chiffon */
+        .key.white.F-key { background-color: #98FB98; } /* Pale Green */
+        .key.white.G-key { background-color: #ADD8E6; } /* Light Blue */
+        .key.white.A-key { background-color: #B0C4DE; } /* Light Steel Blue */
+        .key.white.B-key { background-color: #E6E6FA; } /* Lavender */
+
+        .key.white {
+            width: 10%;
+            height: 100%;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 10px;
+            z-index: 1;
+        }
+
+        .key.black {
+            width: 6%;
+            height: 60%;
+            background-color: #000;
+            margin-left: -3%;
+            margin-right: -3%;
+            z-index: 2;
+            border-radius: 0 0 5px 5px;
+        }
+        
+        .key.black .key-content {
+            display: none; /* Hide icons/labels on black keys */
+        }
+
+        /* --- Icon and Text Styling --- */
+        .key-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .icon-text {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+
+        .icon-image {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+
+        .note-label {
+            font-size: 0.8em;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: #444;
+            margin: 0;
+            text-align: center;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 700px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-group label {
+            font-weight: bold;
+        }
+
+        button, select {
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button.play-button {
+            background-color: #2196F3;
+        }
+
+        button.play-button:hover {
+            background-color: #1e87e2;
+        }
+
+        /* Responsive layout adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .piano-container {
+                height: 200px;
+                padding: 15px;
+            }
+            .key.white {
+                width: 12%;
+            }
+            .key.black {
+                width: 7%;
+                height: 55%;
+            }
+            .icon-text {
+                font-size: 2em;
+            }
+            .icon-image {
+                width: 40px;
+                height: 40px;
+            }
+            body {
+                gap: 20px;
+            }
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <h2>Piano Controls</h2>
+        <div class="control-group">
+            <button id="mode-toggle">Play Note Only</button>
+        </div>
+        <div class="control-group">
+            <label for="song-select">Choose a Song:</label>
+            <select id="song-select">
+                <option value="mary">Mary Had a Little Lamb</option>
+                <option value="twinkle">Twinkle Twinkle Little Star</option>
+                <option value="ode">Ode to Joy</option>
+            </select>
+            <button id="play-button" class="play-button">Play Song</button>
+        </div>
+    </div>
+
+    <h2>Do-Re-Mi Piano</h2>
+    <div id="piano-solfege" class="piano-container">
+        <!-- C key -->
+        <div class="key white C-key" data-note="C" data-solfege="Do">
+            <div class="key-content">
+                <span class="icon-text">🦌</span>
+                <span class="note-label">Do</span>
+            </div>
+        </div>
+        <div class="key black" data-note="C#"></div>
+        <!-- D key -->
+        <div class="key white D-key" data-note="D" data-solfege="Re">
+            <div class="key-content">
+                <span class="icon-text">☀️</span>
+                <span class="note-label">Re</span>
+            </div>
+        </div>
+        <div class="key black" data-note="D#"></div>
+        <!-- E key -->
+        <div class="key white E-key" data-note="E" data-solfege="Mi">
+            <div class="key-content">
+                <span class="icon-text">🪞</span>
+                <span class="note-label">Mi</span>
+            </div>
+        </div>
+        <!-- F key -->
+        <div class="key white F-key" data-note="F" data-solfege="Fa">
+            <div class="key-content">
+                <span class="icon-text">🏃‍♂️</span>
+                <span class="note-label">Fa</span>
+            </div>
+        </div>
+        <div class="key black" data-note="F#"></div>
+        <!-- G key -->
+        <div class="key white G-key" data-note="G" data-solfege="Sol">
+            <div class="key-content">
+                <span class="icon-text">🧵</span>
+                <span class="note-label">Sol</span>
+            </div>
+        </div>
+        <div class="key black" data-note="G#"></div>
+        <!-- A key with a special image icon -->
+        <div class="key white A-key" data-note="A" data-solfege="La">
+            <div class="key-content">
+                <img class="icon-image" src="https://raw.githubusercontent.com/boobalootoo/Piano/main/dilb9y9-6274f5d3-5620-4bc2-9f34-17ad379a411d.png" alt="La icon">
+                <span class="note-label">La</span>
+            </div>
+        </div>
+        <div class="key black" data-note="A#"></div>
+        <!-- B key -->
+        <div class="key white B-key" data-note="B" data-solfege="Ti">
+            <div class="key-content">
+                <span class="icon-text">🍵</span>
+                <span class="note-label">Ti</span>
+            </div>
+        </div>
+    </div>
+
+    <h2>Letter Piano</h2>
+    <div id="piano-letters" class="piano-container">
+        <!-- C key -->
+        <div class="key white C-key" data-note="C" data-letter-name="chick">
+            <div class="key-content">
+                <span class="icon-text">🐣</span>
+                <span class="note-label">C<br>chick</span>
+            </div>
+        </div>
+        <div class="key black" data-note="C#"></div>
+        <!-- D key -->
+        <div class="key white D-key" data-note="D" data-letter-name="duck">
+            <div class="key-content">
+                <span class="icon-text">🦆</span>
+                <span class="note-label">D<br>duck</span>
+            </div>
+        </div>
+        <div class="key black" data-note="D#"></div>
+        <!-- E key -->
+        <div class="key white E-key" data-note="E" data-letter-name="elf">
+            <div class="key-content">
+                <span class="icon-text">🧝‍♀️</span>
+                <span class="note-label">E<br>elf</span>
+            </div>
+        </div>
+        <!-- F key -->
+        <div class="key white F-key" data-note="F" data-letter-name="fan">
+            <div class="key-content">
+                <span class="icon-text">🪭</span>
+                <span class="note-label">F<br>fan</span>
+            </div>
+        </div>
+        <div class="key black" data-note="F#"></div>
+        <!-- G key -->
+        <div class="key white G-key" data-note="G" data-letter-name="glue">
+            <div class="key-content">
+                <span class="icon-text">🥅</span>
+                <span class="note-label">G<br>goal</span>
+            </div>
+        </div>
+        <div class="key black" data-note="G#"></div>
+        <!-- A key -->
+        <div class="key white A-key" data-note="A" data-letter-name="aim">
+            <div class="key-content">
+                <span class="icon-text">🎯</span>
+                <span class="note-label">A<br>aim</span>
+            </div>
+        </div>
+        <div class="key black" data-note="A#"></div>
+        <!-- B key -->
+        <div class="key white B-key" data-note="B" data-letter-name="bug">
+            <div class="key-content">
+                <span class="icon-text">🐞</span>
+                <span class="note-label">B<br>bug</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to convert base64 audio data to a playable WAV Blob
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Helper function to create a WAV file from raw PCM data
+        function pcmToWav(pcm16Data, sampleRate) {
+            const buffer = new ArrayBuffer(44 + pcm16Data.length * 2);
+            const view = new DataView(buffer);
+            let offset = 0;
+
+            function writeString(str) {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset + i, str.charCodeAt(i));
+                }
+                offset += str.length;
+            }
+
+            function writeUint32(val) {
+                view.setUint32(offset, val, true);
+                offset += 4;
+            }
+
+            function writeUint16(val) {
+                view.setUint16(offset, val, true);
+                offset += 2;
+            }
+
+            writeString('RIFF');
+            writeUint32(36 + pcm16Data.length * 2);
+            writeString('WAVE');
+            writeString('fmt ');
+            writeUint32(16);
+            writeUint16(1); // PCM format
+            writeUint16(1); // Mono
+            writeUint32(sampleRate);
+            writeUint32(sampleRate * 2);
+            writeUint16(2); // Block align
+            writeUint16(16); // Bits per sample
+            writeString('data');
+            writeUint32(pcm16Data.length * 2);
+
+            for (let i = 0; i < pcm16Data.length; i++) {
+                view.setInt16(offset, pcm16Data[i], true);
+                offset += 2;
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // General setup and state variables
+            const modeToggleBtn = document.getElementById('mode-toggle');
+            const songSelect = document.getElementById('song-select');
+            const playButton = document.getElementById('play-button');
+            const allKeys = document.querySelectorAll('.key');
+            let audioContext;
+            let oscillators = {};
+            let isSpeechMode = false;
+            let currentSongPlayback = null;
+
+            // --- API Configuration ---
+            const apiKey = ""; // Canvas will provide this at runtime
+            const ttsModelUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+            // --- Audio Functions ---
+            function getOrCreateAudioContext() {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                return audioContext;
+            }
+
+            function playNote(frequency, keyElement) {
+                if (!audioContext) getOrCreateAudioContext();
+                
+                if (oscillators[keyElement]) {
+                    stopNote(keyElement);
+                }
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.value = frequency;
+
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.01);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.start();
+                oscillators[keyElement] = { oscillator, gainNode };
+            }
+
+            function stopNote(keyElement) {
+                if (oscillators[keyElement]) {
+                    const { gainNode, oscillator } = oscillators[keyElement];
+                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                    delete oscillators[keyElement];
+                }
+            }
+            
+            async function playNoteName(noteName, retries = 3, delay = 1000) {
+                const payload = {
+                    contents: [{
+                        parts: [{ text: noteName }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } }
+                        }
+                    },
+                };
+                try {
+                    const response = await fetch(ttsModelUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 429 && retries > 0) {
+                            console.warn(`TTS API rate limit exceeded, retrying in ${delay}ms...`);
+                            await new Promise(res => setTimeout(res, delay));
+                            return playNoteName(noteName, retries - 1, delay * 2);
+                        }
+                        throw new Error(`TTS API error: ${response.status} ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    const part = result?.candidates?.[0]?.content?.parts?.[0];
+                    const audioData = part?.inlineData?.data;
+                    const mimeType = part?.inlineData?.mimeType;
+
+                    if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
+                        const sampleRate = parseInt(mimeType.match(/rate=(\d+)/)[1], 10);
+                        const pcmData = base64ToArrayBuffer(audioData);
+                        const pcm16 = new Int16Array(pcmData);
+                        const wavBlob = pcmToWav(pcm16, sampleRate);
+                        const audioUrl = URL.createObjectURL(wavBlob);
+                        
+                        const audio = new Audio(audioUrl);
+                        audio.play();
+                        audio.addEventListener('ended', () => URL.revokeObjectURL(audioUrl));
+                    } else {
+                         console.error("Invalid TTS response format:", result);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch or play TTS audio:", error);
+                }
+            }
+
+            // --- Song Data ---
+            const songs = {
+                mary: [
+                    { note: 'E', duration: 500 }, { note: 'D', duration: 500 }, { note: 'C', duration: 500 }, { note: 'D', duration: 500 },
+                    { note: 'E', duration: 500 }, { note: 'E', duration: 500 }, { note: 'E', duration: 1000 },
+                    { note: 'D', duration: 500 }, { note: 'D', duration: 500 }, { note: 'D', duration: 1000 },
+                    { note: 'E', duration: 500 }, { note: 'G', duration: 500 }, { note: 'G', duration: 1000 },
+                    { note: 'E', duration: 500 }, { note: 'D', duration: 500 }, { note: 'C', duration: 500 }, { note: 'D', duration: 500 },
+                    { note: 'E', duration: 500 }, { note: 'E', duration: 500 }, { note: 'E', duration: 500 },
+                    { note: 'E', duration: 500 }, { note: 'D', duration: 500 }, { note: 'D', duration: 500 },
+                    { note: 'E', duration: 500 }, { note: 'D', duration: 500 }, { note: 'C', duration: 1000 }
+                ],
+                twinkle: [
+                    { note: 'C', duration: 500 }, { note: 'C', duration: 500 }, { note: 'G', duration: 500 }, { note: 'G', duration: 500 },
+                    { note: 'A', duration: 500 }, { note: 'A', duration: 500 }, { note: 'G', duration: 1000 },
+                    { note: 'F', duration: 500 }, { note: 'F', duration: 500 }, { note: 'E', duration: 500 }, { note: 'E', duration: 500 },
+                    { note: 'D', duration: 500 }, { note: 'D', duration: 500 }, { note: 'C', duration: 1000 }
+                ],
+                ode: [
+                    { note: 'E', duration: 500 }, { note: 'E', duration: 500 }, { note: 'F', duration: 500 }, { note: 'G', duration: 500 },
+                    { note: 'G', duration: 500 }, { note: 'F', duration: 500 }, { note: 'E', duration: 500 }, { note: 'D', duration: 500 },
+                    { note: 'C', duration: 500 }, { note: 'C', duration: 500 }, { note: 'D', duration: 500 }, { note: 'E', duration: 500 },
+                    { note: 'E', duration: 750 }, { note: 'D', duration: 250 }, { note: 'D', duration: 1000 }
+                ]
+            };
+
+            // Frequencies for the musical notes
+            const noteFrequencies = {
+                'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13, 'E': 329.63,
+                'F': 349.23, 'F#': 369.99, 'G': 392.00, 'G#': 415.30, 'A': 440.00,
+                'A#': 466.16, 'B': 493.88
+            };
+
+            // --- Event Listeners and Logic ---
+            modeToggleBtn.addEventListener('click', () => {
+                isSpeechMode = !isSpeechMode;
+                modeToggleBtn.textContent = isSpeechMode ? 'Play Note & Word' : 'Play Note Only';
+            });
+
+            allKeys.forEach(key => {
+                const note = key.dataset.note;
+                const frequency = noteFrequencies[note];
+                const solfegeName = key.dataset.solfege;
+                const letterName = key.dataset.letterName;
+                
+                function handlePress() {
+                    playNote(frequency, key);
+                    if (isSpeechMode) {
+                        if (solfegeName) {
+                            playNoteName(solfegeName);
+                        } else if (letterName) {
+                            playNoteName(letterName);
+                        }
+                    }
+                    key.classList.add('active');
+                }
+
+                function handleRelease() {
+                    stopNote(key);
+                    key.classList.remove('active');
+                }
+
+                key.addEventListener('mousedown', (e) => { e.preventDefault(); handlePress(); });
+                key.addEventListener('mouseup', handleRelease);
+                key.addEventListener('mouseleave', handleRelease);
+                key.addEventListener('touchstart', (e) => { e.preventDefault(); handlePress(); });
+                key.addEventListener('touchend', (e) => { e.preventDefault(); handleRelease(); });
+            });
+
+            playButton.addEventListener('click', () => {
+                if (currentSongPlayback) {
+                    stopSong();
+                } else {
+                    const selectedSong = songs[songSelect.value];
+                    playSong(selectedSong);
+                }
+            });
+
+            function playSong(song) {
+                let noteIndex = 0;
+                playButton.textContent = "Stop Song";
+                
+                const playNextNote = () => {
+                    if (noteIndex >= song.length) {
+                        stopSong();
+                        return;
+                    }
+
+                    const note = song[noteIndex];
+                    const targetKey = document.querySelector(`.piano-container:not(.disabled) [data-note="${note.note}"]`);
+                    
+                    if (targetKey) {
+                        const frequency = noteFrequencies[note.note];
+                        playNote(frequency, targetKey);
+                        targetKey.classList.add('active');
+
+                        if (isSpeechMode) {
+                            const solfegeName = targetKey.dataset.solfege;
+                            const letterName = targetKey.dataset.letter-name;
+                            if (solfegeName) {
+                                playNoteName(solfegeName);
+                            } else if (letterName) {
+                                playNoteName(letterName);
+                            }
+                        }
+
+                        setTimeout(() => {
+                            stopNote(targetKey);
+                            targetKey.classList.remove('active');
+                            noteIndex++;
+                            currentSongPlayback = setTimeout(playNextNote, 100);
+                        }, note.duration);
+                    } else {
+                        noteIndex++;
+                        currentSongPlayback = setTimeout(playNextNote, 100);
+                    }
+                };
+
+                currentSongPlayback = setTimeout(playNextNote, 0);
+            }
+
+            function stopSong() {
+                if (currentSongPlayback) {
+                    clearTimeout(currentSongPlayback);
+                    currentSongPlayback = null;
+                    playButton.textContent = "Play Song";
+                    allKeys.forEach(key => key.classList.remove('active'));
+                }
+            }
+        });
+    </script>
+</body>
+</html>
